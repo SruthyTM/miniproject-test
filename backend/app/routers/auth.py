@@ -22,8 +22,7 @@ def register(payload: schemas.RegisterRequest, db: Session = Depends(get_db)):
     code = generate_verification_code()
     user = models.User(
         email=payload.email,
-        # Password is not collected in this OTP-only onboarding flow.
-        password_hash=hash_password("otp_only_user"),
+        password_hash=hash_password(payload.password),
         is_verified=False,
         verification_code=code,
     )

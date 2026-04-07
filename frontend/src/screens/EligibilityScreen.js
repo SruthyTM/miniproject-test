@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Button, Text } from "react-native";
-
+import { Alert, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { useAppState } from "../../App";
 import { api } from "../api/client";
 import { CheckboxOption } from "../components/CheckboxOption";
 import { ScreenContainer } from "../components/ScreenContainer";
+import { colors } from "../theme/colors";
 
 export function EligibilityScreen({ navigation }) {
   const { token } = useAppState();
@@ -38,10 +38,10 @@ export function EligibilityScreen({ navigation }) {
   }
 
   return (
-    <ScreenContainer title="Eligibility" subtitle="Step 4: answer pre-quiz MCQs">
+    <ScreenContainer title="Eligibility" subtitle="Calibrate your agent profile">
       {questions.map((q) => (
         <React.Fragment key={q.id}>
-          <Text style={{ fontWeight: "700", marginBottom: 8 }}>{q.text}</Text>
+          <Text style={styles.qText}>{q.text}</Text>
           {q.options.map((opt, idx) => (
             <CheckboxOption
               key={`${q.id}-${idx}`}
@@ -52,7 +52,15 @@ export function EligibilityScreen({ navigation }) {
           ))}
         </React.Fragment>
       ))}
-      <Button title="Submit Eligibility" onPress={onSubmit} />
+      <TouchableOpacity style={styles.btn} onPress={onSubmit}>
+        <Text style={styles.btnText}>Proceed to Challenge →</Text>
+      </TouchableOpacity>
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  qText: { fontWeight: "900", marginBottom: 12, color: colors.text, fontSize: 16 },
+  btn: { backgroundColor: colors.accent, padding: 16, borderRadius: 12, alignItems: "center", marginTop: 16 },
+  btnText: { color: colors.bg1, fontWeight: "900", fontSize: 16 },
+});

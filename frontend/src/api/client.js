@@ -16,6 +16,7 @@ async function request(path, method = "GET", body, token) {
 }
 
 export const api = {
+  getChallengeTime: () => request("/quiz/challenge-time", "GET"),
   register: (payload) => request("/auth/register", "POST", payload),
   verifyEmail: (payload) => request("/auth/verify-email", "POST", payload),
   login: (payload) => request("/auth/login", "POST", payload),

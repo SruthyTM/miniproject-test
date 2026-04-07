@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import { EligibilityScreen } from "./src/screens/EligibilityScreen";
+import { LandingScreen } from "./src/screens/LandingScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
 import { QuizScreen } from "./src/screens/QuizScreen";
 import { RegisterScreen } from "./src/screens/RegisterScreen";
@@ -38,7 +39,13 @@ export default function App() {
   return (
     <AppContext.Provider value={value}>
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Register">
+        <Stack.Navigator
+          initialRouteName="Landing"
+          screenOptions={{
+            headerShown: false,
+          }}
+        >
+          <Stack.Screen name="Landing" component={LandingScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
           <Stack.Screen name="Login" component={LoginScreen} />

@@ -24,6 +24,19 @@ def public_question(index: int):
     return {"id": q["id"], "question": q["question"], "options": q["options"]}
 
 
+@router.get("/challenge-time")
+def get_challenge_time(db: Session = Depends(get_db)):
+    config = db.query(models.SystemConfig).filter_by(key="challenge_end_time").first()
+    if not config:
+        end_date = datetime.utcnow() + timedelta(hours=66)
+        config = models.SystemConfig(key="challenge_end_time", value=end_date.isoformat())
+        db.add(config)
+        db.commit()
+    end_date = datetime.fromisoformat(config.value)
+    remaining = (end_date - datetime.utcnow()).total_seconds()
+    return {"remaining_seconds": max(int(remaining), 0)}
+
+
 @router.post("/start", response_model=schemas.StartQuizResponse)
 def start_quiz(db: Session = Depends(get_db), user=Depends(current_user)):
     session = models.QuizSession(

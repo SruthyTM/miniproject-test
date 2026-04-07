@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Button, Text } from "react-native";
-
+import { Alert, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { useAppState } from "../../App";
 import { api } from "../api/client";
 import { ScreenContainer } from "../components/ScreenContainer";
+import { colors } from "../theme/colors";
 
 export function QuizScreen({ navigation }) {
   const { token, setQuizSessionId, quizSessionId, setQuizResult } = useAppState();
@@ -37,17 +37,12 @@ export function QuizScreen({ navigation }) {
         if (data.remaining_seconds <= 0) {
           navigation.replace("Timeout");
         }
-      } catch (_err) {
-        // Ignore transient timer polling errors.
-      }
+      } catch (_err) {}
     }, 1000);
     return () => clearInterval(timer);
   }, [quizSessionId, token, navigation]);
 
-  const title = useMemo(
-    () => `Step 5: quiz in progress (${index + 1}/${total})`,
-    [index, total]
-  );
+  const title = useMemo(() => `Challenge in Progress (${index + 1}/${total})`, [index, total]);
 
   async function submit(answerIndex) {
     try {
@@ -70,18 +65,30 @@ export function QuizScreen({ navigation }) {
   }
 
   if (!question) {
-    return <ScreenContainer title="Quiz" subtitle="Loading quiz..." />;
+    return <ScreenContainer title="Challenge" subtitle="Initializing secure environment..." />;
   }
 
   return (
-    <ScreenContainer title="Quiz" subtitle={title}>
-      <Text style={{ fontWeight: "700", marginBottom: 8 }}>
-        Time Remaining: {remaining}s
-      </Text>
-      <Text style={{ fontSize: 17, marginBottom: 10 }}>{question.question}</Text>
+    <ScreenContainer title="Challenge" subtitle={title}>
+      <View style={styles.timerWrap}>
+        <Text style={styles.timerLabel}>SECONDS REMAINING: </Text>
+        <Text style={styles.timerVal}>{remaining}</Text>
+      </View>
+      <Text style={styles.qText}>{question.question}</Text>
       {question.options.map((opt, idx) => (
-        <Button key={idx} title={opt} onPress={() => submit(idx)} />
+        <TouchableOpacity key={idx} style={styles.choiceBtn} onPress={() => submit(idx)}>
+          <Text style={styles.choiceText}>{opt}</Text>
+        </TouchableOpacity>
       ))}
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  timerWrap: { backgroundColor: "rgba(255,153,0,0.1)", padding: 12, borderRadius: 8, borderWidth: 1, borderColor: "rgba(255,153,0,0.3)", flexDirection: "row", justifyContent: "center", alignItems: "center", marginBottom: 20 },
+  timerLabel: { color: colors.accent, fontWeight: "bold", fontSize: 12 },
+  timerVal: { color: colors.accent, fontWeight: "900", fontSize: 18, fontVariant: ["tabular-nums"] },
+  qText: { color: colors.text, fontSize: 18, fontWeight: "800", marginBottom: 20, textAlign: "center" },
+  choiceBtn: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder, padding: 16, borderRadius: 12, marginBottom: 12, alignItems: "center" },
+  choiceText: { color: colors.text, fontSize: 16, fontWeight: "700" },
+});
