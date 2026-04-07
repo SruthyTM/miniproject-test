@@ -1,4 +1,6 @@
-const BASE_URL = "http://127.0.0.1:8001";
+import Toast from "react-native-toast-message";
+
+const BASE_URL = "http://127.0.0.1:8000";
 
 async function request(path, method = "GET", body, token) {
   const headers = { "Content-Type": "application/json" };
@@ -10,6 +12,11 @@ async function request(path, method = "GET", body, token) {
   });
   const data = await res.json();
   if (!res.ok) {
+    Toast.show({
+      type: "error",
+      text1: "Error",
+      text2: data.detail || "Request failed",
+    });
     throw new Error(data.detail || "Request failed");
   }
   return data;
