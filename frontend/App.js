@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import Toast from "react-native-toast-message";
 import { EligibilityScreen } from "./src/screens/EligibilityScreen";
 import { LandingScreen } from "./src/screens/LandingScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
@@ -55,6 +55,7 @@ export default function App() {
           <Stack.Screen name="Result" component={ResultScreen} />
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast />
     </AppContext.Provider>
   );
 }
