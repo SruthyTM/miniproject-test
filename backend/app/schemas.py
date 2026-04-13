@@ -60,3 +60,24 @@ class QuizResultResponse(BaseModel):
     score: int
     total_questions: int
     ranking: list[dict[str, int | str]]
+
+
+class FinalAnswerSubmitRequest(BaseModel):
+    userId: str
+    answer: str
+
+
+class FinalAnswerSubmitResponse(BaseModel):
+    ai_score: int
+    feedback: str
+    total_score: int
+
+
+class LeaderboardItem(BaseModel):
+    user_id: int
+    name: str
+    total_score: int
+
+
+class LeaderboardResponse(BaseModel):
+    leaderboard: list[LeaderboardItem]

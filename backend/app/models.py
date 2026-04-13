@@ -24,6 +24,9 @@ class User(Base):
     quiz_sessions: Mapped[list["QuizSession"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    submissions: Mapped[list["Submission"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class AuthToken(Base):
@@ -49,3 +52,16 @@ class QuizSession(Base):
     timed_out: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="quiz_sessions")
+
+
+class Submission(Base):
+    __tablename__ = "submissions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    answer: Mapped[str] = mapped_column(String, nullable=False)
+    ai_score: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_score: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user: Mapped["User"] = relationship(back_populates="submissions")

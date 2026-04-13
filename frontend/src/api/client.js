@@ -36,4 +36,6 @@ export const api = {
   remainingSeconds: (sessionId, token) =>
     request(`/quiz/${sessionId}/remaining-seconds`, "GET", null, token),
   result: (sessionId, token) => request(`/quiz/${sessionId}/result`, "GET", null, token),
+  submitFinalAnswer: (payload, token) => request("/submit-final-answer", "POST", payload, token),
+  leaderboard: () => request("/leaderboard", "GET"),
 };

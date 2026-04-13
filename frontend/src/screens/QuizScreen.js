@@ -54,7 +54,7 @@ export function QuizScreen({ navigation }) {
       if (res.completed) {
         const result = await api.result(quizSessionId, token);
         setQuizResult(result);
-        navigation.replace("Result");
+        navigation.replace("FinalAnswer", { quizScore: result.score });
         return;
       }
       setQuestion(res.next_question);

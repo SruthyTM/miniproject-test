@@ -5,12 +5,14 @@ import { ScreenContainer } from "../components/ScreenContainer";
 import { colors } from "../theme/colors";
 
 export function ResultScreen({ navigation }) {
-  const { quizResult } = useAppState();
+  const { finalResult, setToken, setEmail, setQuizSessionId, setQuizResult, setFinalResult } = useAppState();
+  const threshold = 150;
+  const showRetry = finalResult?.total_score < 120;
 
-  if (!quizResult) {
+  if (!finalResult) {
     return (
       <ScreenContainer title="Results" subtitle="No result found">
-        <TouchableOpacity style={styles.btnSecondary} onPress={() => navigation.reset({ index: 0, routes: [{ name: "Login" }] })}>
+        <TouchableOpacity style={styles.btnSecondary} onPress={() => navigation.reset({ index: 0, routes: [{ name: "Landing" }] })}>
           <Text style={styles.btnTextSecondary}>Return Home</Text>
         </TouchableOpacity>
       </ScreenContainer>
@@ -18,44 +20,52 @@ export function ResultScreen({ navigation }) {
   }
 
   return (
-    <ScreenContainer title="Challenge Complete" subtitle="Your final score and global ranking">
+    <ScreenContainer title="Challenge Complete" subtitle="Quiz + AI bonus final result">
       <View style={styles.scoreCard}>
-        <Text style={styles.scoreLabel}>YOUR FINAL SCORE</Text>
-        <Text style={styles.scoreValue}>{quizResult.score} <Text style={styles.scoreTotal}>/ {quizResult.total_questions}</Text></Text>
+        <Text style={styles.scoreLabel}>QUIZ SCORE</Text>
+        <Text style={styles.scoreMini}>{finalResult.quiz_score}</Text>
+        <Text style={styles.scoreLabel}>AI SCORE</Text>
+        <Text style={styles.scoreMini}>{finalResult.ai_score}</Text>
+        <Text style={styles.scoreLabel}>FEEDBACK</Text>
+        <Text style={styles.feedback}>{finalResult.feedback}</Text>
+        <Text style={styles.scoreLabel}>TOTAL SCORE</Text>
+        <Text style={styles.scoreValue}>{finalResult.total_score}</Text>
+        {finalResult.total_score > threshold && <Text style={styles.won}>You Won</Text>}
       </View>
 
-      <Text style={styles.leaderboardTitle}>🏆 LEADERBOARD TOP 50</Text>
-      <View style={styles.leaderboard}>
-        {quizResult.ranking.map((row) => (
-          <View key={`${row.rank}-${row.email}`} style={styles.rankRow}>
-            <View style={styles.rankLeft}>
-              <Text style={styles.rankBadge}>#{row.rank}</Text>
-              <Text style={styles.rankEmail}>{row.email.split("@")[0]}***</Text>
-            </View>
-            <Text style={styles.rankScore}>{row.score} pts</Text>
-          </View>
-        ))}
-      </View>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.reset({ index: 0, routes: [{ name: "Landing" }] })}>
-        <Text style={styles.btnText}>Finish & Return</Text>
+      <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate("Leaderboard")}>
+        <Text style={styles.btnText}>View Leaderboard</Text>
+      </TouchableOpacity>
+      {showRetry && (
+        <TouchableOpacity style={styles.btnSecondary} onPress={() => navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] })}>
+          <Text style={styles.btnTextSecondary}>Retry Quiz</Text>
+        </TouchableOpacity>
+      )}
+      <TouchableOpacity
+        style={styles.btnSecondary}
+        onPress={() => {
+          setToken(null);
+          setEmail("");
+          setQuizSessionId(null);
+          setQuizResult(null);
+          setFinalResult(null);
+          navigation.reset({ index: 0, routes: [{ name: "Landing" }] });
+        }}
+      >
+        <Text style={styles.btnTextSecondary}>Logout</Text>
       </TouchableOpacity>
     </ScreenContainer>
   );
 }
 
 const styles = StyleSheet.create({
-  scoreCard: { backgroundColor: "rgba(0,229,255,0.1)", borderWidth: 1, borderColor: "rgba(0,229,255,0.3)", borderRadius: 16, padding: 24, alignItems: "center", marginBottom: 30 },
+  scoreCard: { backgroundColor: "rgba(0,229,255,0.1)", borderWidth: 1, borderColor: "rgba(0,229,255,0.3)", borderRadius: 16, padding: 24, alignItems: "center", marginBottom: 20 },
   scoreLabel: { color: colors.primary, fontSize: 12, fontWeight: "bold", letterSpacing: 1, marginBottom: 8 },
+  scoreMini: { color: colors.text, fontSize: 22, fontWeight: "900", marginBottom: 10 },
   scoreValue: { color: colors.text, fontSize: 36, fontWeight: "900" },
-  scoreTotal: { color: colors.textMuted, fontSize: 20 },
-  leaderboardTitle: { color: "#FFD700", fontSize: 14, fontWeight: "bold", marginBottom: 12 },
-  leaderboard: { width: "100%", backgroundColor: colors.surface, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: colors.surfaceBorder, marginBottom: 24 },
-  rankRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" },
-  rankLeft: { flexDirection: "row", alignItems: "center" },
-  rankBadge: { color: colors.primary, fontWeight: "900", width: 30 },
-  rankEmail: { color: colors.textMuted, fontWeight: "600" },
-  rankScore: { color: colors.accent, fontWeight: "bold" },
-  btn: { backgroundColor: colors.secondary, padding: 16, borderRadius: 12, alignItems: "center", width: "100%" },
+  feedback: { color: colors.textMuted, fontWeight: "600", marginBottom: 10, textAlign: "center" },
+  won: { color: "#00ff95", fontWeight: "900", fontSize: 20, marginTop: 10 },
+  btn: { backgroundColor: colors.secondary, padding: 16, borderRadius: 12, alignItems: "center", width: "100%", marginBottom: 10 },
   btnText: { color: colors.text, fontWeight: "900", fontSize: 16 },
   btnSecondary: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.surfaceBorder, padding: 16, borderRadius: 12, alignItems: "center", width: "100%" },
   btnTextSecondary: { color: colors.text, fontWeight: "bold", fontSize: 16 },
