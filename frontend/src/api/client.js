@@ -41,4 +41,6 @@ export const api = {
   getAdminSessions: (token) => request("/admin/sessions", "GET", null, token),
   toggleShortlist: (sessionId, token) => request(`/admin/sessions/${sessionId}/shortlist`, "POST", {}, token),
   getDashboard: (token) => request("/admin/dashboard", "GET", null, token),
+  getAdminUsers: (token) => request("/admin/users", "GET", null, token),
+  toggleUserAdmin: (userId, token) => request(`/admin/users/${userId}/toggle-admin`, "POST", {}, token),
 };

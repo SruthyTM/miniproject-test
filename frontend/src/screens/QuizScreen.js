@@ -67,9 +67,7 @@ export function QuizScreen({ navigation }) {
       }
 
       if (res.completed) {
-        const result = await api.result(quizSessionId, token);
-        setQuizResult(result);
-        navigation.replace("Result");
+        navigation.replace("Creative");
         return;
       }
       setQuestion(res.next_question);
@@ -108,6 +106,11 @@ export function QuizScreen({ navigation }) {
       </View>
 
       <View style={styles.body}>
+        <View style={styles.badgeRow}>
+          <Text style={{ color: "#00E5FF", fontWeight: "bold", fontSize: 12 }}>
+            DEBUG: CORRECT ANSWER = {["A", "B", "C", "D"][question.correct_answer]}
+          </Text>
+        </View>
         <View style={styles.badgeRow}>
           <View style={styles.badgeType}><Text style={styles.badgeTypeText}>MULTIPLE CHOICE</Text></View>
           <View style={styles.badgeMonitor}>

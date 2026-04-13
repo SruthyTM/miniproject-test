@@ -55,6 +55,8 @@ class QuizSession(Base):
     # New fields for Creative Submission
     creative_text = Column(Text, nullable=True)
     is_shortlisted = Column(Boolean, default=False, nullable=False)
+    is_rejected = Column(Boolean, default=False, nullable=False)
+    ai_score = Column(Integer, default=0, nullable=False)
     entry_reference = Column(String, nullable=True)
     submitted_at = Column(DateTime, nullable=True)
 

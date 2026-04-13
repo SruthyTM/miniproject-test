@@ -38,6 +38,7 @@ class QuizQuestion(BaseModel):
     id: int
     question: str
     options: List[str]
+    correct_answer: Optional[int] = None
 
 
 class StartQuizResponse(BaseModel):
@@ -101,5 +102,9 @@ class DashboardResponse(BaseModel):
     slots_left: int
     shortlisted_count: int
     is_shortlisted: bool
+    is_rejected: bool
     entry_reference: Optional[str]
     competition_close_seconds: int
+    ai_score: int = 0
+    rank: int = 0
+    total_entries: int = 0

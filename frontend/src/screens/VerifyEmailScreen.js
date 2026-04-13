@@ -52,11 +52,20 @@ export function VerifyEmailScreen({ navigation, route }) {
         text2: "Email verified successfully!",
       });
 
-      setTimeout(() => {
+      setTimeout(async () => {
         if (res.is_admin) {
           navigation.reset({ index: 0, routes: [{ name: "AdminDashboard" }] });
         } else {
-          navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+          try {
+            const dashboard = await api.getDashboard(res.token);
+            if (dashboard.entries_used > 0) {
+              navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] });
+            } else {
+              navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+            }
+          } catch (e) {
+            navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+          }
         }
       }, 1000);
     } catch (err) {

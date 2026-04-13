@@ -7,3 +7,6 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 python-multipart==0.0.12
 psycopg[binary]
+langchain-groq
+langgraph
+python-dotenv

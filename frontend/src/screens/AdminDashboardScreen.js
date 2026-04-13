@@ -64,9 +64,14 @@ export function AdminDashboardScreen({ navigation }) {
 
       <View style={styles.header}>
         <Text style={styles.title}>Admin Panel</Text>
-        <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: "Login" }] })}>
-             <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={() => navigation.navigate("AdminUsers")} style={styles.usersBtn}>
+            <Text style={styles.usersBtnText}>Users</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.reset({ index: 0, routes: [{ name: "Login" }] })}>
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {loading ? (
@@ -87,6 +92,9 @@ export function AdminDashboardScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0B091A" },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 20 },
+  headerRight: { flexDirection: "row", alignItems: "center" },
+  usersBtn: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, marginRight: 15 },
+  usersBtnText: { color: "#fff", fontWeight: "bold", fontSize: 13 },
   title: { color: "#fff", fontSize: 24, fontWeight: "900" },
   logoutText: { color: "#E91E63", fontWeight: "bold" },
   loading: { color: "#8a8ea8", textAlign: "center", marginTop: 50 },

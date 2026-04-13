@@ -16,6 +16,9 @@ import { CreativeScreen } from "./src/screens/CreativeScreen";
 import { EntryAcceptedScreen } from "./src/screens/EntryAcceptedScreen";
 import { DashboardScreen } from "./src/screens/DashboardScreen";
 import { AdminDashboardScreen } from "./src/screens/AdminDashboardScreen";
+import { ShortlistedDetailScreen } from "./src/screens/ShortlistedDetailScreen";
+import { AdminUsersScreen } from "./src/screens/AdminUsersScreen";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -68,6 +71,8 @@ export default function App() {
           <Stack.Screen name="EntryAccepted" component={EntryAcceptedScreen} />
           <Stack.Screen name="Dashboard" component={DashboardScreen} />
           <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+          <Stack.Screen name="AdminUsers" component={AdminUsersScreen} />
+          <Stack.Screen name="ShortlistedDetail" component={ShortlistedDetailScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

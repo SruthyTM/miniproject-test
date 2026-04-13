@@ -18,7 +18,7 @@ export function LoginScreen({ navigation, route }) {
       if (res.is_admin) {
         navigation.reset({ index: 0, routes: [{ name: "AdminDashboard" }] });
       } else {
-        navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+        navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] });
       }
     } catch (err) {
       Alert.alert("Login Failed", err.message);

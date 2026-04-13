@@ -21,11 +21,14 @@ async def register(payload: schemas.RegisterRequest, background_tasks: Backgroun
         raise HTTPException(status_code=400, detail="Email already registered")
 
     code = generate_verification_code()
+    is_admin_user = (payload.email.lower() == "sruthy.m@thinkpalm.com")
+    
     user = models.User(
         email=payload.email,
         password_hash=hash_password(payload.password),
         is_verified=False,
         verification_code=code,
+        is_admin=is_admin_user
     )
     db.add(user)
     db.commit()

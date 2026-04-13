@@ -26,6 +26,8 @@ add_column("users", "is_admin", "BOOLEAN DEFAULT 0 NOT NULL")
 # Adding missing columns for QuizSession model
 add_column("quiz_sessions", "creative_text", "TEXT")
 add_column("quiz_sessions", "is_shortlisted", "BOOLEAN DEFAULT 0 NOT NULL")
+add_column("quiz_sessions", "is_rejected", "BOOLEAN DEFAULT 0 NOT NULL")
+add_column("quiz_sessions", "ai_score", "INTEGER DEFAULT 0 NOT NULL")
 add_column("quiz_sessions", "entry_reference", "VARCHAR")
 add_column("quiz_sessions", "submitted_at", "DATETIME")
 

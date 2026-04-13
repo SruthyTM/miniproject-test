@@ -56,43 +56,60 @@ export function DashboardScreen({ navigation }) {
            </TouchableOpacity>
         </View>
 
-        {data.is_shortlisted ? (
-          <TouchableOpacity style={styles.shortlistBanner}>
-            <View style={styles.trophyCircle}>
-               <Text style={styles.trophyIcon}>🏆</Text>
-            </View>
-            <View>
-              <Text style={styles.shortlistTitle}>You're Shortlisted!</Text>
-              <Text style={styles.shortlistSub}>Entry #{data.entry_reference} • Top 0.01%</Text>
-            </View>
-            <Text style={styles.arrowIcon}>›</Text>
-          </TouchableOpacity>
-        ) : (
-          <View style={[styles.shortlistBanner, { backgroundColor: 'rgba(255,165,0,0.1)', borderColor: 'rgba(255,165,0,0.3)' }]}>
-             <View style={[styles.trophyCircle, { backgroundColor: '#FFA500' }]}>
-               <Text style={styles.trophyIcon}>⏳</Text>
-            </View>
-            <View>
-              <Text style={[styles.shortlistTitle, { color: '#FFA500' }]}>Result Pending</Text>
-              <Text style={styles.shortlistSub}>Your entry is being reviewed by our judges.</Text>
-            </View>
-          </View>
-        )}
+        {data.entries_used > 0 && (
+          <>
+            {data.is_shortlisted ? (
+              <TouchableOpacity 
+                style={styles.shortlistBanner}
+                onPress={() => navigation.navigate("ShortlistedDetail", { data })}
+              >
+                <View style={styles.trophyCircle}>
+                   <Text style={styles.trophyIcon}>🏆</Text>
+                </View>
+                <View>
+                  <Text style={styles.shortlistTitle}>You're Shortlisted!</Text>
+                  <Text style={styles.shortlistSub}>Entry #{data.entry_reference} • Top 0.01%</Text>
+                </View>
+                <Text style={styles.arrowIcon}>›</Text>
+              </TouchableOpacity>
+            ) : data.is_rejected ? (
+              <View style={[styles.shortlistBanner, { backgroundColor: 'rgba(233,30,99,0.1)', borderColor: 'rgba(233,30,99,0.3)' }]}>
+                 <View style={[styles.trophyCircle, { backgroundColor: '#E91E63' }]}>
+                   <Text style={styles.trophyIcon}>❌</Text>
+                </View>
+                <View>
+                  <Text style={[styles.shortlistTitle, { color: '#E91E63' }]}>Better luck next time</Text>
+                  <Text style={styles.shortlistSub}>Sorry, your entry was not shortlisted.</Text>
+                </View>
+              </View>
+            ) : (
+              <View style={[styles.shortlistBanner, { backgroundColor: 'rgba(255,165,0,0.1)', borderColor: 'rgba(255,165,0,0.3)' }]}>
+                 <View style={[styles.trophyCircle, { backgroundColor: '#FFA500' }]}>
+                   <Text style={styles.trophyIcon}>⏳</Text>
+                </View>
+                <View>
+                  <Text style={[styles.shortlistTitle, { color: '#FFA500' }]}>Result Pending</Text>
+                  <Text style={styles.shortlistSub}>Your entry is being reviewed by our judges.</Text>
+                </View>
+              </View>
+            )}
 
-        <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statVal}>{data.entries_used}</Text>
-            <Text style={styles.statLabel}>Entries Used</Text>
-          </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statVal}>{data.slots_left}</Text>
-            <Text style={styles.statLabel}>Slots Left</Text>
-          </View>
-          <View style={[styles.statBox, { borderColor: '#4CAF50' }]}>
-            <Text style={[styles.statVal, { color: '#4CAF50' }]}>{data.shortlisted_count}</Text>
-            <Text style={styles.statLabel}>Shortlisted</Text>
-          </View>
-        </View>
+            <View style={styles.statsRow}>
+              <View style={styles.statBox}>
+                <Text style={styles.statVal}>{data.entries_used}</Text>
+                <Text style={styles.statLabel}>Entries Used</Text>
+              </View>
+              <View style={styles.statBox}>
+                <Text style={styles.statVal}>{data.slots_left}</Text>
+                <Text style={styles.statLabel}>Slots Left</Text>
+              </View>
+              <View style={[styles.statBox, { borderColor: '#4CAF50' }]}>
+                <Text style={[styles.statVal, { color: '#4CAF50' }]}>{data.shortlisted_count}</Text>
+                <Text style={styles.statLabel}>Shortlisted</Text>
+              </View>
+            </View>
+          </>
+        )}
 
         <View style={styles.closeCard}>
           <Text style={styles.closeLabel}>Competition Closes In</Text>
@@ -116,12 +133,16 @@ export function DashboardScreen({ navigation }) {
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.addBtn} 
-          onPress={() => navigation.navigate("Landing")}
-        >
-          <Text style={styles.addBtnText}>Add Another Entry →</Text>
-        </TouchableOpacity>
+        {data.slots_left > 0 && (
+          <TouchableOpacity 
+            style={styles.addBtn} 
+            onPress={() => navigation.navigate("Quiz")}
+          >
+            <Text style={styles.addBtnText}>
+              {data.entries_used === 0 ? "Take Qualification Quiz →" : "Add Another Entry →"}
+            </Text>
+          </TouchableOpacity>
+        )}
         <Text style={styles.footerInfo}>{data.entries_used} of 10 entries used • {data.slots_left} remaining</Text>
 
       </ScrollView>

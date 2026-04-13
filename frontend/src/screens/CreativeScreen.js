@@ -9,6 +9,12 @@ export function CreativeScreen({ navigation }) {
   const [text, setText] = useState("");
   const [remaining, setRemaining] = useState(120);
   const [loading, setLoading] = useState(false);
+  const handleTextChange = (newText) => {
+    const newWords = newText.trim() === "" ? 0 : newText.trim().split(/\s+/).length;
+    if (newWords <= 25 || newText.length < text.length) {
+      setText(newText);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -86,7 +92,7 @@ export function CreativeScreen({ navigation }) {
           placeholder="Type your 25-word response here..."
           placeholderTextColor="#5c5c7d"
           value={text}
-          onChangeText={setText}
+          onChangeText={handleTextChange}
           contextMenuHidden={true} // Disable paste/copy menu
         />
 

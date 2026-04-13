@@ -7,6 +7,10 @@ import { colors } from "../theme/colors";
 export function ResultScreen({ navigation }) {
   const { quizResult } = useAppState();
 
+  React.useEffect(() => {
+    navigation.replace("Creative");
+  }, []);
+
   if (!quizResult) {
     return (
       <ScreenContainer title="Results" subtitle="No result found">
