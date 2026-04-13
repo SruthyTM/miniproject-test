@@ -1,4 +1,6 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
+from typing import List, Dict, Optional, Union
 
 
 class RegisterRequest(BaseModel):
@@ -19,22 +21,23 @@ class LoginRequest(BaseModel):
 class AuthResponse(BaseModel):
     token: str
     email: EmailStr
+    is_admin: bool = False
 
 
 class EligibilityQuestion(BaseModel):
     id: int
     text: str
-    options: list[str]
+    options: List[str]
 
 
 class EligibilitySubmitRequest(BaseModel):
-    answers: dict[int, list[int]]
+    answers: Dict[int, List[int]]
 
 
 class QuizQuestion(BaseModel):
     id: int
     question: str
-    options: list[str]
+    options: List[str]
 
 
 class StartQuizResponse(BaseModel):
@@ -52,11 +55,51 @@ class SubmitAnswerRequest(BaseModel):
 class SubmitAnswerResponse(BaseModel):
     completed: bool
     timed_out: bool
-    next_index: int | None = None
-    next_question: QuizQuestion | None = None
+    correct: bool = True
+    next_index: Optional[int] = None
+    next_question: Optional[QuizQuestion] = None
+
+
+class RankingEntry(BaseModel):
+    email: str
+    score: int
+    rank: int
 
 
 class QuizResultResponse(BaseModel):
     score: int
     total_questions: int
-    ranking: list[dict[str, int | str]]
+    attempts_count: int = 0
+    ranking: List[RankingEntry]
+
+
+# Creative Submission
+class CreativeSubmitRequest(BaseModel):
+    text: str
+
+
+class CreativeSubmitResponse(BaseModel):
+    entry_reference: str
+    submitted_at: str
+
+
+# Admin Schemas
+class AdminSessionEntry(BaseModel):
+    id: int
+    email: str
+    score: int
+    creative_text: Optional[str]
+    is_shortlisted: bool
+    entry_reference: Optional[str]
+    submitted_at: Optional[datetime]
+
+    class Config:
+        from_attributes = True
+
+class DashboardResponse(BaseModel):
+    entries_used: int
+    slots_left: int
+    shortlisted_count: int
+    is_shortlisted: bool
+    entry_reference: Optional[str]
+    competition_close_seconds: int

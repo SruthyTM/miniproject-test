@@ -4,7 +4,7 @@ import { useAppState } from "../../App";
 import { api } from "../api/client";
 
 export function LoginScreen({ navigation, route }) {
-  const { setToken, setEmail } = useAppState();
+  const { setToken, setEmail, setIsAdmin } = useAppState();
   const [email, setLocalEmail] = useState(route.params?.email || "");
   const [password, setPassword] = useState("");
 
@@ -13,7 +13,13 @@ export function LoginScreen({ navigation, route }) {
       const res = await api.login({ email, password });
       setToken(res.token);
       setEmail(res.email);
-      navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+      setIsAdmin(res.is_admin);
+      
+      if (res.is_admin) {
+        navigation.reset({ index: 0, routes: [{ name: "AdminDashboard" }] });
+      } else {
+        navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+      }
     } catch (err) {
       Alert.alert("Login Failed", err.message);
     }
