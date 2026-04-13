@@ -12,6 +12,15 @@ import { RegisterScreen } from "./src/screens/RegisterScreen";
 import { ResultScreen } from "./src/screens/ResultScreen";
 import { TimeoutScreen } from "./src/screens/TimeoutScreen";
 import { VerifyEmailScreen } from "./src/screens/VerifyEmailScreen";
+import { IncorrectAnswerScreen } from "./src/screens/IncorrectAnswerScreen";
+import { QuizSuccessScreen } from "./src/screens/QuizSuccessScreen";
+import { CreativeScreen } from "./src/screens/CreativeScreen";
+import { EntryAcceptedScreen } from "./src/screens/EntryAcceptedScreen";
+import { DashboardScreen } from "./src/screens/DashboardScreen";
+import { AdminDashboardScreen } from "./src/screens/AdminDashboardScreen";
+import { ShortlistedDetailScreen } from "./src/screens/ShortlistedDetailScreen";
+import { AdminUsersScreen } from "./src/screens/AdminUsersScreen";
+
 
 const Stack = createNativeStackNavigator();
 
@@ -24,6 +33,7 @@ export default function App() {
   const [quizSessionId, setQuizSessionId] = useState(null);
   const [quizResult, setQuizResult] = useState(null);
   const [finalResult, setFinalResult] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const value = useMemo(
     () => ({
@@ -37,8 +47,10 @@ export default function App() {
       setQuizResult,
       finalResult,
       setFinalResult,
+      isAdmin,
+      setIsAdmin,
     }),
-    [token, email, quizSessionId, quizResult, finalResult]
+    [token, email, quizSessionId, quizResult, finalResult, isAdmin]
   );
 
   return (
@@ -59,6 +71,15 @@ export default function App() {
           <Stack.Screen name="FinalAnswer" component={FinalAnswerScreen} />
           <Stack.Screen name="Timeout" component={TimeoutScreen} />
           <Stack.Screen name="Result" component={ResultScreen} />
+          <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
+          <Stack.Screen name="IncorrectAnswer" component={IncorrectAnswerScreen} />
+          <Stack.Screen name="QuizSuccess" component={QuizSuccessScreen} />
+          <Stack.Screen name="Creative" component={CreativeScreen} />
+          <Stack.Screen name="EntryAccepted" component={EntryAcceptedScreen} />
+          <Stack.Screen name="Dashboard" component={DashboardScreen} />
+          <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
+          <Stack.Screen name="AdminUsers" component={AdminUsersScreen} />
+          <Stack.Screen name="ShortlistedDetail" component={ShortlistedDetailScreen} />
           <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
         </Stack.Navigator>
       </NavigationContainer>

@@ -8,3 +8,6 @@ bcrypt==4.0.1
 python-multipart==0.0.12
 psycopg[binary]
 transformers>=4.40.0
+langchain-groq
+langgraph
+python-dotenv

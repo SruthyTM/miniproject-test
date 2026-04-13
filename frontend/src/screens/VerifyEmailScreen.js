@@ -1,10 +1,11 @@
 import React, { useState, useRef } from "react";
 import { Alert, TextInput, StyleSheet, TouchableOpacity, Text, View, SafeAreaView, StatusBar, ScrollView } from "react-native";
+import Toast from "react-native-toast-message";
 import { useAppState } from "../../App";
 import { api } from "../api/client";
 
 export function VerifyEmailScreen({ navigation, route }) {
-  const { setToken, setEmail: setAppEmail } = useAppState();
+  const { setToken, setEmail: setAppEmail, setIsAdmin } = useAppState();
   const [email] = useState(route.params?.email || "your email");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,11 @@ export function VerifyEmailScreen({ navigation, route }) {
   async function onVerify() {
     const code = otp.join("");
     if (code.length < 6) {
-      Alert.alert("Error", "Please enter the full 6-digit code.");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter the full 6-digit code.",
+      });
       return;
     }
 
@@ -40,14 +45,48 @@ export function VerifyEmailScreen({ navigation, route }) {
       const res = await api.verifyEmail({ email, code });
       setToken(res.token);
       setAppEmail(res.email);
-      Alert.alert("Success", "Email verified successfully!");
-      navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+      setIsAdmin(res.is_admin);
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Email verified successfully!",
+      });
+
+      setTimeout(async () => {
+        if (res.is_admin) {
+          navigation.reset({ index: 0, routes: [{ name: "AdminDashboard" }] });
+        } else {
+          try {
+            const dashboard = await api.getDashboard(res.token);
+            if (dashboard.entries_used > 0) {
+              navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] });
+            } else {
+              navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+            }
+          } catch (e) {
+            navigation.reset({ index: 0, routes: [{ name: "Eligibility" }] });
+          }
+        }
+      }, 1000);
     } catch (err) {
-      Alert.alert("Verification Failed", err.message);
+      Toast.show({
+        type: "error",
+        text1: "Verification Failed",
+        text2: err.message,
+      });
     } finally {
       setLoading(false);
     }
   }
+
+  const handleResend = async () => {
+    try {
+      const res = await api.resendOtp(email);
+      Alert.alert("Success", "New OTP has been sent. Code: " + res.verification_code);
+    } catch (err) {
+      // client.js already shows toast, but Alert is good for specific feedback
+    }
+  };
 
   const maskedEmail = () => {
     const [user, domain] = email.split("@");
@@ -115,7 +154,7 @@ export function VerifyEmailScreen({ navigation, route }) {
 
           <View style={styles.resendRow}>
             <Text style={styles.resendText}>Did not receive the code?</Text>
-            <TouchableOpacity onPress={() => Alert.alert("Dev Mode", "Resend triggered")}>
+            <TouchableOpacity onPress={handleResend}>
               <Text style={styles.resendLink}>Resend Code</Text>
             </TouchableOpacity>
           </View>

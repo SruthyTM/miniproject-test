@@ -7,11 +7,13 @@ from .. import models, schemas
 from ..database import get_db
 from ..deps import current_user
 from ..questions import QUIZ_QUESTIONS
+from ..ai_agent import verify_answer_with_ai
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 
-TOTAL_QUESTIONS = 15
-QUIZ_DURATION_SECONDS = 300
+TOTAL_QUESTIONS = 20
+QUIZ_DURATION_SECONDS = 3600 # 1 hour total (let frontend handle 20s per question)
+MAX_ATTEMPTS = 10
 
 
 def has_timed_out(session: models.QuizSession) -> bool:
@@ -21,7 +23,7 @@ def has_timed_out(session: models.QuizSession) -> bool:
 
 def public_question(index: int):
     q = QUIZ_QUESTIONS[index]
-    return {"id": q["id"], "question": q["question"], "options": q["options"]}
+    return {"id": q["id"], "question": q["question"], "options": q["options"], "correct_answer": q["answer"]}
 
 
 @router.get("/challenge-time")
@@ -39,6 +41,11 @@ def get_challenge_time(db: Session = Depends(get_db)):
 
 @router.post("/start", response_model=schemas.StartQuizResponse)
 def start_quiz(db: Session = Depends(get_db), user=Depends(current_user)):
+    # Check attempts
+    attempts = db.query(models.QuizSession).filter(models.QuizSession.user_id == user.id).count()
+    if attempts >= MAX_ATTEMPTS:
+        raise HTTPException(status_code=403, detail=f"Maximum of {MAX_ATTEMPTS} attempts allowed.")
+
     session = models.QuizSession(
         user_id=user.id, current_index=0, score=0, duration_seconds=QUIZ_DURATION_SECONDS
     )
@@ -70,34 +77,50 @@ def submit_answer(
     if not session:
         raise HTTPException(status_code=404, detail="Quiz session not found")
     if session.completed:
-        return {"completed": True, "timed_out": session.timed_out}
+        return {"completed": True, "timed_out": session.timed_out, "correct": True}
 
     if has_timed_out(session):
         session.completed = True
         session.timed_out = True
         db.commit()
-        return {"completed": True, "timed_out": True}
+        return {"completed": True, "timed_out": True, "correct": False}
 
     current_q = QUIZ_QUESTIONS[session.current_index]
-    if payload.answer_index == current_q["answer"]:
+    # Attempt AI verification first
+    ai_result = verify_answer_with_ai(current_q["question"], current_q["options"], payload.answer_index)
+    
+    if ai_result is not None:
+        is_correct = ai_result
+    else:
+        # Fallback to hardcoded comparison
+        is_correct = payload.answer_index == current_q["answer"]
+    
+    if is_correct:
         session.score += 1
-
-    session.current_index += 1
-
-    if session.current_index >= TOTAL_QUESTIONS:
+        session.current_index += 1
+        
+        if session.current_index >= TOTAL_QUESTIONS:
+            session.completed = True
+            if session.score > user.best_score:
+                user.best_score = session.score
+            db.commit()
+            return {"completed": True, "timed_out": False, "correct": True}
+        
+        db.commit()
+        return {
+            "completed": False,
+            "timed_out": False,
+            "correct": True,
+            "next_index": session.current_index,
+            "next_question": public_question(session.current_index),
+        }
+    else:
+        # WRONG ANSWER - 100% required, so end session immediately
         session.completed = True
         if session.score > user.best_score:
             user.best_score = session.score
         db.commit()
-        return {"completed": True, "timed_out": False}
-
-    db.commit()
-    return {
-        "completed": False,
-        "timed_out": False,
-        "next_index": session.current_index,
-        "next_question": public_question(session.current_index),
-    }
+        return {"completed": True, "timed_out": False, "correct": False}
 
 
 @router.get("/{session_id}/remaining-seconds")
@@ -126,10 +149,38 @@ def quiz_result(session_id: int, db: Session = Depends(get_db), user=Depends(cur
     if not session.completed:
         raise HTTPException(status_code=400, detail="Quiz not completed yet")
 
+    # Get attempt count for the UI
+    attempts_count = db.query(models.QuizSession).filter(models.QuizSession.user_id == user.id).count()
+
     ranking_users = db.query(models.User).order_by(models.User.best_score.desc()).limit(50).all()
     ranking = [
         {"email": u.email, "score": u.best_score, "rank": i + 1}
         for i, u in enumerate(ranking_users)
     ]
 
-    return {"score": session.score, "total_questions": TOTAL_QUESTIONS, "ranking": ranking}
+    return {"score": session.score, "total_questions": TOTAL_QUESTIONS, "ranking": ranking, "attempts_count": attempts_count}
+
+@router.post("/{session_id}/creative", response_model=schemas.CreativeSubmitResponse)
+def submit_creative(session_id: int, payload: schemas.CreativeSubmitRequest, db: Session = Depends(get_db), user=Depends(current_user)):
+    session = db.query(models.QuizSession).filter(models.QuizSession.id == session_id, models.QuizSession.user_id == user.id).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    # 25 words check
+    words = payload.text.strip().split()
+    if len(words) != 25:
+        raise HTTPException(status_code=400, detail=f"Exactly 25 words required. You provided {len(words)}.")
+    
+    import random
+    session.creative_text = payload.text
+    session.entry_reference = f"TBSC-2026-{session.id:06d}"
+    session.submitted_at = datetime.utcnow()
+    
+    # Assigning random mock score for demonstration since AI API not always available
+    session.ai_score = random.randint(85, 99)
+    db.commit()
+    
+    return {
+        "entry_reference": session.entry_reference,
+        "submitted_at": session.submitted_at.strftime("%d %b %Y, %H:%M UTC")
+    }

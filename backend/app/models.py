@@ -1,67 +1,75 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import relationship
 
 from .database import Base
+
+
 class SystemConfig(Base):
     __tablename__ = "system_config"
 
-    key: Mapped[str] = mapped_column(String, primary_key=True, index=True)
-    value: Mapped[str] = mapped_column(String, nullable=False)
+    key = Column(String, primary_key=True, index=True)
+    value = Column(String, nullable=False)
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
-    password_hash: Mapped[str] = mapped_column(String, nullable=False)
-    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    verification_code: Mapped[str] = mapped_column(String, nullable=False)
-    best_score: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password_hash = Column(String, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
+    verification_code = Column(String, nullable=False)
+    best_score = Column(Integer, default=0, nullable=False)
+    is_admin = Column(Boolean, default=False, nullable=False)
 
-    quiz_sessions: Mapped[list["QuizSession"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
+    quiz_sessions = relationship(
+        "QuizSession", back_populates="user", cascade="all, delete-orphan"
     )
-    submissions: Mapped[list["Submission"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
-    )
+    submissions = relationship("Submission", back_populates="user", cascade="all, delete-orphan")
 
 
 class AuthToken(Base):
     __tablename__ = "auth_tokens"
 
-    token: Mapped[str] = mapped_column(String, primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    token = Column(String, primary_key=True)
+    user_id = Column(ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    user: Mapped["User"] = relationship()
+    user = relationship("User")
 
 
 class QuizSession(Base):
     __tablename__ = "quiz_sessions"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    current_index: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    score: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    started_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    duration_seconds: Mapped[int] = mapped_column(Integer, default=300, nullable=False)
-    completed: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    timed_out: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-
-    user: Mapped["User"] = relationship(back_populates="quiz_sessions")
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(ForeignKey("users.id"), nullable=False)
+    current_index = Column(Integer, default=0, nullable=False)
+    score = Column(Integer, default=0, nullable=False)
+    started_at = Column(DateTime, default=datetime.utcnow)
+    duration_seconds = Column(Integer, default=300, nullable=False)
+    completed = Column(Boolean, default=False, nullable=False)
+    timed_out = Column(Boolean, default=False, nullable=False)
+    
+    # New fields for Creative Submission
+    creative_text = Column(Text, nullable=True)
+    is_shortlisted = Column(Boolean, default=False, nullable=False)
+    is_rejected = Column(Boolean, default=False, nullable=False)
+    ai_score = Column(Integer, default=0, nullable=False)
+    entry_reference = Column(String, nullable=True)
+    submitted_at = Column(DateTime, nullable=True)
+    user = relationship("User", back_populates="quiz_sessions")
 
 
 class Submission(Base):
     __tablename__ = "submissions"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    answer: Mapped[str] = mapped_column(String, nullable=False)
-    ai_score: Mapped[int] = mapped_column(Integer, nullable=False)
-    total_score: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(ForeignKey("users.id"), nullable=False, index=True)
+    answer = Column(String, nullable=False)
+    ai_score = Column(Integer, nullable=False)
+    total_score = Column(Integer, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
-    user: Mapped["User"] = relationship(back_populates="submissions")
+    user = relationship("User", back_populates="submissions")
