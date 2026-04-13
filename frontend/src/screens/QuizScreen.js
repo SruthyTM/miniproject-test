@@ -67,7 +67,9 @@ export function QuizScreen({ navigation }) {
       }
 
       if (res.completed) {
-        navigation.replace("Creative");
+        const result = await api.result(quizSessionId, token);
+        setQuizResult(result);
+        navigation.replace("FinalAnswer", { quizScore: result.score });
         return;
       }
       setQuestion(res.next_question);

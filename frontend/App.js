@@ -5,6 +5,8 @@ import Toast from "react-native-toast-message";
 import { EligibilityScreen } from "./src/screens/EligibilityScreen";
 import { LandingScreen } from "./src/screens/LandingScreen";
 import { LoginScreen } from "./src/screens/LoginScreen";
+import { LeaderboardScreen } from "./src/screens/LeaderboardScreen";
+import { FinalAnswerScreen } from "./src/screens/FinalAnswerScreen";
 import { QuizScreen } from "./src/screens/QuizScreen";
 import { RegisterScreen } from "./src/screens/RegisterScreen";
 import { ResultScreen } from "./src/screens/ResultScreen";
@@ -30,6 +32,7 @@ export default function App() {
   const [email, setEmail] = useState("");
   const [quizSessionId, setQuizSessionId] = useState(null);
   const [quizResult, setQuizResult] = useState(null);
+  const [finalResult, setFinalResult] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
 
   const value = useMemo(
@@ -42,10 +45,12 @@ export default function App() {
       setQuizSessionId,
       quizResult,
       setQuizResult,
+      finalResult,
+      setFinalResult,
       isAdmin,
       setIsAdmin,
     }),
-    [token, email, quizSessionId, quizResult, isAdmin]
+    [token, email, quizSessionId, quizResult, finalResult, isAdmin]
   );
 
   return (
@@ -63,8 +68,10 @@ export default function App() {
           <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Eligibility" component={EligibilityScreen} />
           <Stack.Screen name="Quiz" component={QuizScreen} />
+          <Stack.Screen name="FinalAnswer" component={FinalAnswerScreen} />
           <Stack.Screen name="Timeout" component={TimeoutScreen} />
           <Stack.Screen name="Result" component={ResultScreen} />
+          <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
           <Stack.Screen name="IncorrectAnswer" component={IncorrectAnswerScreen} />
           <Stack.Screen name="QuizSuccess" component={QuizSuccessScreen} />
           <Stack.Screen name="Creative" component={CreativeScreen} />
@@ -73,6 +80,7 @@ export default function App() {
           <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
           <Stack.Screen name="AdminUsers" component={AdminUsersScreen} />
           <Stack.Screen name="ShortlistedDetail" component={ShortlistedDetailScreen} />
+          <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
         </Stack.Navigator>
       </NavigationContainer>
       <Toast />

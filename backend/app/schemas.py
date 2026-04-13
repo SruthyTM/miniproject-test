@@ -108,3 +108,24 @@ class DashboardResponse(BaseModel):
     ai_score: int = 0
     rank: int = 0
     total_entries: int = 0
+
+
+class FinalAnswerSubmitRequest(BaseModel):
+    userId: str
+    answer: str
+
+
+class FinalAnswerSubmitResponse(BaseModel):
+    ai_score: int
+    feedback: str
+    total_score: int
+
+
+class LeaderboardItem(BaseModel):
+    user_id: int
+    name: str
+    total_score: int
+
+
+class LeaderboardResponse(BaseModel):
+    leaderboard: List[LeaderboardItem]

@@ -1,14 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-import os
 from dotenv import load_dotenv
 
-load_dotenv()
-
-from .database import Base, engine, SessionLocal
-from .routers import auth, eligibility, quiz, admin
 from . import models, security
+from .database import Base, SessionLocal, engine
+from .routers import admin, auth, eligibility, final_answer, quiz
+
+load_dotenv()
 
 Base.metadata.create_all(bind=engine)
 
@@ -40,6 +39,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(eligibility.router)
 app.include_router(quiz.router)
+app.include_router(final_answer.router)
 app.include_router(admin.router)
 
 

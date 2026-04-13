@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import List, Optional, Union
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Column
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -28,6 +27,7 @@ class User(Base):
     quiz_sessions = relationship(
         "QuizSession", back_populates="user", cascade="all, delete-orphan"
     )
+    submissions = relationship("Submission", back_populates="user", cascade="all, delete-orphan")
 
 
 class AuthToken(Base):
@@ -59,5 +59,17 @@ class QuizSession(Base):
     ai_score = Column(Integer, default=0, nullable=False)
     entry_reference = Column(String, nullable=True)
     submitted_at = Column(DateTime, nullable=True)
-
     user = relationship("User", back_populates="quiz_sessions")
+
+
+class Submission(Base):
+    __tablename__ = "submissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(ForeignKey("users.id"), nullable=False, index=True)
+    answer = Column(String, nullable=False)
+    ai_score = Column(Integer, nullable=False)
+    total_score = Column(Integer, nullable=False, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="submissions")

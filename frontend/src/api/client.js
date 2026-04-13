@@ -37,6 +37,8 @@ export const api = {
   remainingSeconds: (sessionId, token) =>
     request(`/quiz/${sessionId}/remaining-seconds`, "GET", null, token),
   result: (sessionId, token) => request(`/quiz/${sessionId}/result`, "GET", null, token),
+  submitFinalAnswer: (payload, token) => request("/submit-final-answer", "POST", payload, token),
+  leaderboard: () => request("/leaderboard", "GET"),
   submitCreative: (sessionId, text, token) => request(`/quiz/${sessionId}/creative`, "POST", { text }, token),
   getAdminSessions: (token) => request("/admin/sessions", "GET", null, token),
   toggleShortlist: (sessionId, token) => request(`/admin/sessions/${sessionId}/shortlist`, "POST", {}, token),
