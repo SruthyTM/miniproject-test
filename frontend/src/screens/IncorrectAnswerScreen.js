@@ -4,7 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 export function IncorrectAnswerScreen({ navigation, route }) {
   const attemptsCount = route.params?.attemptsCount || 0;
-  const canRetry = attemptsCount < 3;
+  const canRetry = attemptsCount < 10;
 
   return (
     <SafeAreaView style={styles.container}>

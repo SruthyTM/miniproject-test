@@ -145,7 +145,7 @@ export function AdminDashboardScreen({ navigation }) {
         <Text style={styles.title}>Admin Panel</Text>
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={fixZeroScores} style={styles.fixBtn}>
-            <Text style={styles.fixBtnText}>Fix 0 Scores</Text>
+            {/* <Text style={styles.fixBtnText}>Fix 0 Scores</Text> */}
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("AdminUsers")} style={styles.usersBtn}>
             <Text style={styles.usersBtnText}>Users</Text>
