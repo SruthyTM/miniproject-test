@@ -4,6 +4,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useAppState } from "../../App";
 
 export function ShortlistedDetailScreen({ navigation, route }) {
+  const { appTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
   const data = route.params?.data || {};
   const totalEntries = data.total_entries?.toLocaleString() || "387,241";
   const aiScore = data.ai_score || 94;
@@ -13,7 +15,7 @@ export function ShortlistedDetailScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={["#0B091A", "#1D1B38"]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={themeBgColors} style={StyleSheet.absoluteFill} />
 
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={styles.header}>
@@ -87,7 +89,7 @@ export function ShortlistedDetailScreen({ navigation, route }) {
 
               <Text style={styles.promptLabel}>YOUR RESPONSE</Text>
               <Text style={styles.responseText}>
-                "This beautiful BMW X5 would carry my young family across the country discovering small towns, sharing stories and creating memories together for many years."
+                {data.creative_text ? `"${data.creative_text}"` : "Your creative submission will appear here"}
               </Text>
            </View>
 

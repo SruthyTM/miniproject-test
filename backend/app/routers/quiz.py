@@ -7,7 +7,7 @@ from .. import models, schemas
 from ..database import get_db
 from ..deps import current_user
 from ..questions import QUIZ_QUESTIONS
-from ..ai_agent import verify_answer_with_ai
+from ..ai_agent import verify_answer_with_ai, score_creative_text_with_ai
 
 router = APIRouter(prefix="/quiz", tags=["quiz"])
 
@@ -169,15 +169,25 @@ def submit_creative(session_id: int, payload: schemas.CreativeSubmitRequest, db:
     # 25 words check
     words = payload.text.strip().split()
     if len(words) != 25:
-        raise HTTPException(status_code=400, detail=f"Exactly 25 words required. You provided {len(words)}.")
+        raise HTTPException(
+            status_code=400, detail="Submission must be exactly 25 words."
+        )
+
+    # Use AI Agent to evaluate creative text!
+    print(f"Starting AI evaluation for session {session.id}")
+    ai_eval = score_creative_text_with_ai(payload.text)
+    print(f"AI evaluation completed: {ai_eval}")
     
-    import random
     session.creative_text = payload.text
-    session.entry_reference = f"TBSC-2026-{session.id:06d}"
+    session.ai_score = ai_eval.get("score", 5)
+    session.ai_sentiment = ai_eval.get("sentiment", "Neutral")
+    
+    print(f"Session {session.id} updated - AI Score: {session.ai_score}, AI Sentiment: {session.ai_sentiment}")
+    
+    # Generate reference and timestamp
+    session.entry_reference = f"TBSC-{datetime.utcnow().strftime('%Y')}-{random.randint(100000, 999999)}"
     session.submitted_at = datetime.utcnow()
     
-    # Assigning random mock score for demonstration since AI API not always available
-    session.ai_score = random.randint(85, 99)
     db.commit()
     
     return {

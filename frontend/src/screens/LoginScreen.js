@@ -4,7 +4,9 @@ import { useAppState } from "../../App";
 import { api } from "../api/client";
 
 export function LoginScreen({ navigation, route }) {
-  const { setToken, setEmail, setIsAdmin } = useAppState();
+  const { setToken, setEmail, setIsAdmin, appTheme, setAppTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
+
   const [email, setLocalEmail] = useState(route.params?.email || "");
   const [password, setPassword] = useState("");
 

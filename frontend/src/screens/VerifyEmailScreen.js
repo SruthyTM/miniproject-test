@@ -5,7 +5,9 @@ import { useAppState } from "../../App";
 import { api } from "../api/client";
 
 export function VerifyEmailScreen({ navigation, route }) {
-  const { setToken, setEmail: setAppEmail, setIsAdmin } = useAppState();
+  const { setToken, setEmail: setAppEmail, setIsAdmin, appTheme, setAppTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
+
   const [email] = useState(route.params?.email || "your email");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);

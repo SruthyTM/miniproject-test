@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from .database import Base, engine, SessionLocal
-from .routers import auth, eligibility, quiz, admin
+from .routers import auth, eligibility, quiz, admin, admin_fix
 from . import models, security
 
 Base.metadata.create_all(bind=engine)
@@ -41,6 +41,7 @@ app.include_router(auth.router)
 app.include_router(eligibility.router)
 app.include_router(quiz.router)
 app.include_router(admin.router)
+app.include_router(admin_fix.router)
 
 
 @app.get("/health")

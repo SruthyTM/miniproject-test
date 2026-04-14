@@ -33,9 +33,9 @@ export function IncorrectAnswerScreen({ navigation, route }) {
         {canRetry && (
           <TouchableOpacity 
             style={styles.homeBtn} 
-            onPress={() => navigation.reset({ index: 0, routes: [{ name: "Landing" }] })}
+            onPress={() => navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] })}
           >
-            <Text style={styles.homeBtnText}>Return to Competition Home</Text>
+            <Text style={styles.homeBtnText}>Return to User Dashboard</Text>
           </TouchableOpacity>
         )}
 

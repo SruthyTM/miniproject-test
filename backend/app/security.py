@@ -17,8 +17,8 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 def generate_verification_code() -> str:
-    # Dev OTP requested by product flow.
-    return "123456"
+    import random
+    return str(random.randint(100000, 999999))
 
 
 def generate_token() -> str:

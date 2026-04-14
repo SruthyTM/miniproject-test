@@ -43,4 +43,5 @@ export const api = {
   getDashboard: (token) => request("/admin/dashboard", "GET", null, token),
   getAdminUsers: (token) => request("/admin/users", "GET", null, token),
   toggleUserAdmin: (userId, token) => request(`/admin/users/${userId}/toggle-admin`, "POST", {}, token),
+  fixZeroScores: (token) => request("/admin/sessions?fix_scores=true", "POST", {}, token),
 };

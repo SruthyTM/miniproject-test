@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from typing import Optional
 
 from .. import models, schemas
 from ..database import get_db
 from ..deps import current_user
+from ..ai_agent import get_fallback_score, get_fallback_sentiment
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -29,23 +31,52 @@ def toggle_user_admin(user_id: int, db: Session = Depends(get_db), user=Depends(
     return {"is_admin": target_user.is_admin}
 
 @router.get("/sessions", response_model=list[schemas.AdminSessionEntry])
-def get_all_sessions(db: Session = Depends(get_db), user=Depends(current_user)):
+@router.post("/sessions", response_model=list[schemas.AdminSessionEntry])
+def get_all_sessions(
+    db: Session = Depends(get_db), 
+    user=Depends(current_user), 
+    fix_scores: Optional[bool] = Query(False)
+):
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Not an admin")
     
     sessions = db.query(models.QuizSession).join(models.User).filter(models.QuizSession.completed == True).all()
     
     result = []
+    fixed_count = 0
+    
     for s in sessions:
+        # Fix zero scores only if fix_scores is True
+        ai_score = s.ai_score
+        ai_sentiment = s.ai_sentiment
+        
+        if fix_scores and s.creative_text and (ai_score == 0 or ai_score is None):
+            ai_score = get_fallback_score(s.creative_text)
+            ai_sentiment = get_fallback_sentiment(s.creative_text)
+            
+            # Also update the database
+            s.ai_score = ai_score
+            s.ai_sentiment = ai_sentiment
+            fixed_count += 1
+        
         result.append({
             "id": s.id,
             "email": s.user.email,
             "score": s.score,
             "creative_text": s.creative_text,
             "is_shortlisted": s.is_shortlisted,
+            "is_rejected": s.is_rejected,
+            "ai_score": ai_score or 0,
+            "ai_sentiment": ai_sentiment or "Neutral",
             "entry_reference": s.entry_reference,
             "submitted_at": s.submitted_at
         })
+    
+    # Commit any changes made during the fix
+    if fix_scores:
+        db.commit()
+        return {"sessions": result, "fixed_count": fixed_count}
+    
     return result
 
 @router.post("/sessions/{session_id}/shortlist")
@@ -119,6 +150,7 @@ def get_user_dashboard(db: Session = Depends(get_db), user=Depends(current_user)
         "is_shortlisted": shortlisted_session is not None,
         "is_rejected": is_any_rejected,
         "entry_reference": shortlisted_session.entry_reference if shortlisted_session else None,
+        "creative_text": shortlisted_session.creative_text if shortlisted_session else None,
         "competition_close_seconds": max(remaining, 0),
         "ai_score": ai_score,
         "rank": rank,

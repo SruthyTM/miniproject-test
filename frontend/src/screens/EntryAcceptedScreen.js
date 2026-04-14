@@ -1,14 +1,17 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useAppState } from "../../App";
 
 export function EntryAcceptedScreen({ navigation, route }) {
   const { entryReference, submittedAt } = route.params || {};
+  const { appTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={["#0B091A", "#1D1B38"]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={themeBgColors} style={StyleSheet.absoluteFill} />
 
       <View style={styles.body}>
         <View style={styles.checkCircle}>

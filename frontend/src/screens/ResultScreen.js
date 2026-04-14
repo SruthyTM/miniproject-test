@@ -5,7 +5,9 @@ import { ScreenContainer } from "../components/ScreenContainer";
 import { colors } from "../theme/colors";
 
 export function ResultScreen({ navigation }) {
-  const { quizResult } = useAppState();
+  const { quizResult, appTheme, setAppTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
+
 
   React.useEffect(() => {
     navigation.replace("Creative");
@@ -40,8 +42,8 @@ export function ResultScreen({ navigation }) {
           </View>
         ))}
       </View>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.reset({ index: 0, routes: [{ name: "Landing" }] })}>
-        <Text style={styles.btnText}>Finish & Return</Text>
+      <TouchableOpacity style={styles.btn} onPress={() => navigation.reset({ index: 0, routes: [{ name: "Dashboard" }] })}>
+        <Text style={styles.btnText}>Return to User Dashboard</Text>
       </TouchableOpacity>
     </ScreenContainer>
   );

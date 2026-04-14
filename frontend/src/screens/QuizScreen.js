@@ -5,7 +5,9 @@ import { useAppState } from "../../App";
 import { api } from "../api/client";
 
 export function QuizScreen({ navigation }) {
-  const { token, setQuizSessionId, quizSessionId, setQuizResult } = useAppState();
+  const { token, setQuizSessionId, quizSessionId, setQuizResult, appTheme, setAppTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
+
   const [question, setQuestion] = useState(null);
   const [index, setIndex] = useState(0);
   const [total, setTotal] = useState(20);
@@ -88,7 +90,7 @@ export function QuizScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={["#0B091A", "#1D1B38"]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={themeBgColors} style={StyleSheet.absoluteFill} />
 
       <View style={styles.header}>
         <View>
@@ -155,12 +157,12 @@ export function QuizScreen({ navigation }) {
         </View>
       </View>
 
-      <View style={styles.themeRow}>
-        <Text style={styles.themeLabel}>THEME</Text>
-        <View style={styles.themeIconWhite} />
-        <View style={styles.themeIcon} />
-        <View style={styles.themeIcon} />
-        <View style={styles.themeIcon} />
+            <View style={{flexDirection: "row", alignItems: "center", alignSelf: "center", backgroundColor: "rgba(0,0,0,0.6)", paddingHorizontal: 15, paddingVertical: 8, borderRadius: 20, position: "absolute", bottom: 20, zIndex: 1000}}>
+        <Text style={{color: "#8a8ea8", fontSize: 10, fontWeight: "bold", marginRight: 10}}>THEME</Text>
+        <TouchableOpacity onPress={() => { console.log('theme click purple'); setAppTheme("purple"); }}><View style={{width: 14, height: 14, borderRadius: 7, backgroundColor: appTheme === "purple" ? "#fff" : "#8C52FF", borderWidth: appTheme === "purple" ? 2 : 0, borderColor: "#8C52FF", marginLeft: 8}} /></TouchableOpacity>
+        <TouchableOpacity onPress={() => { console.log('theme click blue'); setAppTheme("blue"); }}><View style={{width: 14, height: 14, borderRadius: 7, backgroundColor: appTheme === "blue" ? "#fff" : "#00E5FF", borderWidth: appTheme === "blue" ? 2 : 0, borderColor: "#00E5FF", marginLeft: 8}} /></TouchableOpacity>
+        <TouchableOpacity onPress={() => { console.log('theme click green'); setAppTheme("green"); }}><View style={{width: 14, height: 14, borderRadius: 7, backgroundColor: appTheme === "green" ? "#fff" : "#4CAF50", borderWidth: appTheme === "green" ? 2 : 0, borderColor: "#4CAF50", marginLeft: 8}} /></TouchableOpacity>
+        <TouchableOpacity onPress={() => { console.log('theme click orange'); setAppTheme("orange"); }}><View style={{width: 14, height: 14, borderRadius: 7, backgroundColor: appTheme === "orange" ? "#fff" : "#FF9900", borderWidth: appTheme === "orange" ? 2 : 0, borderColor: "#FF9900", marginLeft: 8}} /></TouchableOpacity>
       </View>
     </SafeAreaView>
   );

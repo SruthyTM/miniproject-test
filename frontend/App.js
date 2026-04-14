@@ -31,6 +31,7 @@ export default function App() {
   const [quizSessionId, setQuizSessionId] = useState(null);
   const [quizResult, setQuizResult] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [appTheme, setAppTheme] = useState("purple");
 
   const value = useMemo(
     () => ({
@@ -44,8 +45,10 @@ export default function App() {
       setQuizResult,
       isAdmin,
       setIsAdmin,
+      appTheme,
+      setAppTheme,
     }),
-    [token, email, quizSessionId, quizResult, isAdmin]
+    [token, email, quizSessionId, quizResult, isAdmin, appTheme]
   );
 
   return (

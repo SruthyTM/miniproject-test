@@ -89,10 +89,13 @@ class AdminSessionEntry(BaseModel):
     id: int
     email: str
     score: int
-    creative_text: Optional[str]
+    creative_text: Optional[str] = None
     is_shortlisted: bool
-    entry_reference: Optional[str]
-    submitted_at: Optional[datetime]
+    is_rejected: bool
+    ai_score: int
+    ai_sentiment: Optional[str] = None
+    entry_reference: Optional[str] = None
+    submitted_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -104,6 +107,7 @@ class DashboardResponse(BaseModel):
     is_shortlisted: bool
     is_rejected: bool
     entry_reference: Optional[str]
+    creative_text: Optional[str] = None
     competition_close_seconds: int
     ai_score: int = 0
     rank: int = 0

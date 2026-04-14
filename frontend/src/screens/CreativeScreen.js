@@ -5,7 +5,9 @@ import { useAppState } from "../../App";
 import { api } from "../api/client";
 
 export function CreativeScreen({ navigation }) {
-  const { token, quizSessionId } = useAppState();
+  const { token, quizSessionId, appTheme, setAppTheme } = useAppState();
+  const themeBgColors = appTheme === "blue" ? ["#0B101A", "#152E4D"] : appTheme === "green" ? ["#0A1A0D", "#15401E"] : appTheme === "orange" ? ["#1A0C0B", "#421A0F"] : ["#0B091A", "#1D1B38"];
+
   const [text, setText] = useState("");
   const [remaining, setRemaining] = useState(120);
   const [loading, setLoading] = useState(false);
@@ -58,7 +60,7 @@ export function CreativeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <LinearGradient colors={["#0B091A", "#1D1B38"]} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={themeBgColors} style={StyleSheet.absoluteFill} />
 
       <View style={styles.header}>
         <View>
