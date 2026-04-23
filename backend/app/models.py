@@ -24,6 +24,7 @@ class User(Base):
     verification_code = Column(String, nullable=False)
     best_score = Column(Integer, default=0, nullable=False)
     is_admin = Column(Boolean, default=False, nullable=False)
+    penalty_attempts = Column(Integer, default=0, nullable=False)
 
     quiz_sessions = relationship(
         "QuizSession", back_populates="user", cascade="all, delete-orphan"

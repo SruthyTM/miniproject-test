@@ -1,6 +1,6 @@
 import Toast from "react-native-toast-message";
 
-const BASE_URL = "http://127.0.0.1:8000";
+const BASE_URL = "http://127.0.0.1:8007";
 
 async function request(path, method = "GET", body, token) {
   const headers = { "Content-Type": "application/json" };
@@ -36,9 +36,11 @@ export const api = {
     request(`/quiz/${sessionId}/answer`, "POST", { answer_index: answerIndex }, token),
   remainingSeconds: (sessionId, token) =>
     request(`/quiz/${sessionId}/remaining-seconds`, "GET", null, token),
+  handleTimeout: (sessionId, token) =>
+    request(`/quiz/${sessionId}/timeout`, "POST", null, token),
   result: (sessionId, token) => request(`/quiz/${sessionId}/result`, "GET", null, token),
   submitCreative: (sessionId, text, token) => request(`/quiz/${sessionId}/creative`, "POST", { text }, token),
-  getAdminSessions: (token) => request("/admin/sessions", "GET", null, token),
+  getAdminSessions: (token, showPerfectOnly = false) => request(`/admin/sessions${showPerfectOnly ? "?show_perfect_only=true" : ""}`, "GET", null, token),
   toggleShortlist: (sessionId, token) => request(`/admin/sessions/${sessionId}/shortlist`, "POST", {}, token),
   getDashboard: (token) => request("/admin/dashboard", "GET", null, token),
   getAdminUsers: (token) => request("/admin/users", "GET", null, token),

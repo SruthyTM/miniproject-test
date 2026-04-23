@@ -19,6 +19,13 @@ export function AdminDashboardScreen({ navigation }) {
     try {
       const data = await api.getAdminSessions(token);
       console.log("Sessions data received:", data);
+      
+      // Debug: Log the first session to check data structure
+      if (data && data.length > 0) {
+        console.log("First session structure:", Object.keys(data[0]));
+        console.log("First session data:", data[0]);
+      }
+      
       // Check if any sessions still have 0 scores
       const zeroScoreSessions = data.filter(s => s.ai_score === 0);
       console.log("Sessions with 0 scores:", zeroScoreSessions.length);
@@ -108,7 +115,10 @@ export function AdminDashboardScreen({ navigation }) {
     <View style={styles.entryCard}>
       <View style={styles.entryHeader}>
         <Text style={styles.entryEmail}>{item.email}</Text>
-        <Text style={styles.entryScore}>Score: {item.score}</Text>
+        <View style={styles.scoreContainer}>
+          <Text style={styles.entryScore}>20/20</Text>
+          <Text style={styles.attemptsInfo}>{item.total_perfect_attempts || 1} attempts</Text>
+        </View>
       </View>
       <Text style={styles.entryRef}>{item.entry_reference}</Text>
       
@@ -118,8 +128,8 @@ export function AdminDashboardScreen({ navigation }) {
         
         {item.creative_text && (
           <View style={styles.aiEvalBox}>
-            <Text style={styles.aiEvalLabel}>Lucid Engine AI Evaluation:</Text>
-            <Text style={styles.aiEvalScore}>Score: {item.ai_score || 0}/10</Text>
+            <Text style={styles.aiEvalLabel}>Best AI Sentiment Score (from {item.total_perfect_attempts || 1} perfect attempts):</Text>
+            <Text style={styles.aiEvalScore}>Score: {item.best_ai_score || item.ai_score || 0}/10</Text>
             <Text style={styles.aiEvalSentiment}>Sentiment: {item.ai_sentiment || "Neutral"}</Text>
           </View>
         )}
@@ -144,9 +154,6 @@ export function AdminDashboardScreen({ navigation }) {
       <View style={styles.header}>
         <Text style={styles.title}>Admin Panel</Text>
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={fixZeroScores} style={styles.fixBtn}>
-            {/* <Text style={styles.fixBtnText}>Fix 0 Scores</Text> */}
-          </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.navigate("AdminUsers")} style={styles.usersBtn}>
             <Text style={styles.usersBtnText}>Users</Text>
           </TouchableOpacity>
@@ -164,7 +171,7 @@ export function AdminDashboardScreen({ navigation }) {
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={styles.list}
-          ListEmptyComponent={<Text style={styles.empty}>No entries found.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>No perfect scorers (20/20) found yet.</Text>}
         />
       )}
     </SafeAreaView>
@@ -175,6 +182,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0B091A" },
   header: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding: 20 },
   headerRight: { flexDirection: "row", alignItems: "center" },
+  filterBtn: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, marginRight: 10, borderWidth: 1, borderColor: "rgba(255,255,255,0.3)" },
+  filterBtnActive: { backgroundColor: "rgba(76,175,80,0.3)", borderColor: "rgba(76,175,80,0.5)" },
+  filterBtnText: { color: "#fff", fontWeight: "bold", fontSize: 13 },
+  filterBtnTextActive: { color: "#4CAF50", fontWeight: "bold", fontSize: 13 },
   fixBtn: { backgroundColor: "rgba(76,175,80,0.3)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, marginRight: 10, borderWidth: 1, borderColor: "rgba(76,175,80,0.5)" },
   fixBtnText: { color: "#4CAF50", fontWeight: "bold", fontSize: 13 },
   usersBtn: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6, marginRight: 15 },
@@ -186,9 +197,11 @@ const styles = StyleSheet.create({
   
   list: { padding: 20, paddingBottom: 100 },
   entryCard: { backgroundColor: "rgba(255,255,255,0.03)", borderRadius: 16, padding: 20, marginBottom: 15, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
-  entryHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 5 },
-  entryEmail: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  entryScore: { color: "#4CAF50", fontWeight: "bold" },
+  entryHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  entryEmail: { color: "#fff", fontSize: 16, fontWeight: "bold", flex: 1 },
+  scoreContainer: { alignItems: "flex-end" },
+  entryScore: { color: "#4CAF50", fontSize: 16, fontWeight: "900" },
+  attemptsInfo: { color: "#8a8ea8", fontSize: 12, marginTop: 2 },
   entryRef: { color: "#8a8ea8", fontSize: 12, marginBottom: 15 },
 
   creativeBox: { backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 12, padding: 15, marginBottom: 15, borderWidth: 1, borderColor: "rgba(255,255,255,0.05)" },

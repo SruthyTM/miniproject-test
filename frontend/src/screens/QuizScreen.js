@@ -41,12 +41,8 @@ export function QuizScreen({ navigation }) {
       setRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          // Handle timeout
-          api.result(quizSessionId, token).then(res => {
-            navigation.replace("Timeout", { attemptsCount: res.attempts_count });
-          }).catch(() => {
-             navigation.replace("Timeout", { attemptsCount: 1 });
-          });
+          // Let backend handle timeout automatically
+          navigation.replace("Timeout", { attemptsCount: 1, token });
           return 0;
         }
         return prev - 1;

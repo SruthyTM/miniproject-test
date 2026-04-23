@@ -1,10 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, StatusBar } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { api } from "../api/client";
 
 export function TimeoutScreen({ navigation, route }) {
+  const [slotsLeft, setSlotsLeft] = useState(0);
   const attemptsCount = route.params?.attemptsCount || 0;
-  const canRetry = attemptsCount < 3;
+  
+  useEffect(() => {
+    // Fetch current dashboard data to get actual slots remaining
+    const token = route.params?.token;
+    if (token) {
+      api.getDashboard(token).then(data => {
+        setSlotsLeft(data.slots_left || 0);
+      }).catch(() => {
+        setSlotsLeft(0);
+      });
+    }
+  }, [route.params?.token]);
+  
+  const canRetry = slotsLeft > 0;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,8 +39,8 @@ export function TimeoutScreen({ navigation, route }) {
 
         <View style={styles.card}>
           <Text style={styles.cardItem}>
-            An email notification will be sent confirming this incomplete attempt. 
-            You may purchase another entry (max 10 per competition) to try again. 
+            An email notification will be sent confirming this incomplete attempt.{"\n"}
+            You have {slotsLeft} {slotsLeft === 1 ? 'attempt' : 'attempts'} remaining.{"\n"}
             Log out and log back in to begin a new attempt.
           </Text>
         </View>

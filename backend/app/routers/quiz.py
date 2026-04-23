@@ -77,14 +77,17 @@ def submit_answer(
     )
     if not session:
         raise HTTPException(status_code=404, detail="Quiz session not found")
-    if session.completed:
-        return {"completed": True, "timed_out": session.timed_out, "correct": True}
-
-    if has_timed_out(session):
+    
+    # Auto-check for timeout and apply penalty if needed
+    if has_timed_out(session) and not session.completed:
         session.completed = True
         session.timed_out = True
+        user.penalty_attempts += 1
         db.commit()
-        return {"completed": True, "timed_out": True, "correct": False}
+        return {"completed": True, "timed_out": True, "correct": False, "penalty_applied": True}
+    
+    if session.completed:
+        return {"completed": True, "timed_out": session.timed_out, "correct": True}
 
     current_q = QUIZ_QUESTIONS[session.current_index]
     # Attempt AI verification first
@@ -118,10 +121,12 @@ def submit_answer(
     else:
         # WRONG ANSWER - 100% required, so end session immediately
         session.completed = True
+        # Apply penalty for wrong answer
+        user.penalty_attempts += 1
         if session.score > user.best_score:
             user.best_score = session.score
         db.commit()
-        return {"completed": True, "timed_out": False, "correct": False}
+        return {"completed": True, "timed_out": False, "correct": False, "penalty_applied": True}
 
 
 @router.get("/{session_id}/remaining-seconds")
@@ -138,6 +143,34 @@ def remaining_seconds(session_id: int, db: Session = Depends(get_db), user=Depen
     return {"remaining_seconds": max(remaining, 0)}
 
 
+@router.post("/{session_id}/timeout")
+def handle_timeout(session_id: int, db: Session = Depends(get_db), user=Depends(current_user)):
+    session = (
+        db.query(models.QuizSession)
+        .filter(models.QuizSession.id == session_id, models.QuizSession.user_id == user.id)
+        .first()
+    )
+    if not session:
+        raise HTTPException(status_code=404, detail="Quiz session not found")
+    
+    if session.completed:
+        return {"completed": True, "timed_out": session.timed_out, "penalty_applied": False}
+    
+    # Apply timeout penalty
+    session.completed = True
+    session.timed_out = True
+    user.penalty_attempts += 1
+    db.commit()
+    
+    return {
+        "completed": True, 
+        "timed_out": True, 
+        "correct": False, 
+        "penalty_applied": True,
+        "penalty_attempts": user.penalty_attempts
+    }
+
+
 @router.get("/{session_id}/result", response_model=schemas.QuizResultResponse)
 def quiz_result(session_id: int, db: Session = Depends(get_db), user=Depends(current_user)):
     session = (
@@ -147,6 +180,14 @@ def quiz_result(session_id: int, db: Session = Depends(get_db), user=Depends(cur
     )
     if not session:
         raise HTTPException(status_code=404, detail="Quiz session not found")
+    
+    # Auto-check for timeout and apply penalty if needed
+    if has_timed_out(session) and not session.completed:
+        session.completed = True
+        session.timed_out = True
+        user.penalty_attempts += 1
+        db.commit()
+    
     if not session.completed:
         raise HTTPException(status_code=400, detail="Quiz not completed yet")
 

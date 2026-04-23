@@ -40,12 +40,29 @@ def get_all_sessions(
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Not an admin")
     
+    # Get all completed sessions
     sessions = db.query(models.QuizSession).join(models.User).filter(models.QuizSession.completed == True).all()
+    
+    # Group sessions by user to find their highest score and best sentiment
+    user_perfect_sessions = {}
+    for s in sessions:
+        user_id = s.user.id
+        if s.score == 20:  # Only consider perfect scores
+            if user_id not in user_perfect_sessions:
+                user_perfect_sessions[user_id] = []
+            user_perfect_sessions[user_id].append(s)
+    
+    # For each user with perfect scores, find the session with best AI sentiment score
+    perfect_sessions = []
+    for user_id, user_sessions in user_perfect_sessions.items():
+        # Find session with highest AI sentiment score
+        best_session = max(user_sessions, key=lambda x: x.ai_score or 0)
+        perfect_sessions.append(best_session)
     
     result = []
     fixed_count = 0
     
-    for s in sessions:
+    for s in perfect_sessions:
         # Fix zero scores only if fix_scores is True
         ai_score = s.ai_score
         ai_sentiment = s.ai_sentiment
@@ -59,10 +76,15 @@ def get_all_sessions(
             s.ai_sentiment = ai_sentiment
             fixed_count += 1
         
+        # Count total perfect attempts for this user
+        total_perfect_attempts = len(user_perfect_sessions.get(s.user.id, []))
+        
         result.append({
             "id": s.id,
             "email": s.user.email,
-            "score": s.score,
+            "score": s.score,  # This will always be 20 for perfect scorers
+            "total_perfect_attempts": total_perfect_attempts,
+            "best_ai_score": ai_score or 0,
             "creative_text": s.creative_text,
             "is_shortlisted": s.is_shortlisted,
             "is_rejected": s.is_rejected,
@@ -111,13 +133,28 @@ def toggle_reject(session_id: int, db: Session = Depends(get_db), user=Depends(c
 
 @router.get("/dashboard", response_model=schemas.DashboardResponse)
 def get_user_dashboard(db: Session = Depends(get_db), user=Depends(current_user)):
-    sessions = db.query(models.QuizSession).filter(models.QuizSession.user_id == user.id).all()
+    # Count only completed quiz sessions for entries_used
+    completed_sessions = db.query(models.QuizSession).filter(
+        models.QuizSession.user_id == user.id,
+        models.QuizSession.completed == True
+    ).all()
     
-    entries_used = len(sessions)
+    # Count successful completions
+    successful_sessions = db.query(models.QuizSession).filter(
+        models.QuizSession.user_id == user.id,
+        models.QuizSession.completed == True,
+        models.QuizSession.score > 0
+    ).all()
+    
+    # entries_used includes both successful completions AND penalties
+    entries_used = len(successful_sessions) + user.penalty_attempts
     slots_left = max(10 - entries_used, 0)
     
-    shortlisted_session = next((s for s in sessions if s.is_shortlisted), None)
-    is_any_rejected = any(s.is_rejected for s in sessions)
+    # Get all sessions for other logic (shortlisted, rejected, etc.)
+    all_sessions = db.query(models.QuizSession).filter(models.QuizSession.user_id == user.id).all()
+    
+    shortlisted_session = next((s for s in all_sessions if s.is_shortlisted), None)
+    is_any_rejected = any(s.is_rejected for s in all_sessions)
     
     # Competition close time (using system config or fallback)
     config = db.query(models.SystemConfig).filter_by(key="challenge_end_time").first()
